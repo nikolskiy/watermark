@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+
+  watermark:
+    container_name: watermark
+    build: ./
+    image: watermark:latest
+    ports:
+      - "8080:8080"
