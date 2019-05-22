@@ -6,23 +6,35 @@ from io import BytesIO
 
 from wtforms import Form, BooleanField, StringField, SelectField, IntegerField, FileField, validators
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 root = os.path.dirname(__file__)
 
 app = Flask(__name__)
 
 
+def image_file_is_required(_, field):
+    image = request.files.get(field.name)
+    if not image.filename:
+        raise validators.StopValidation('An image file is required')
+
+
+def allowed_file_formats(form, field):
+    image = request.files[field.name]
+    base, ext = os.path.splitext(secure_filename(image.filename))
+    if ext.lstrip('.').lower() not in {'png', 'jpg', 'jpeg', 'gif'}:
+        raise validators.ValidationError('Invalid image format')
+    form.base_image_name = base
+
+
 class UploadForm(Form):
-    text = StringField('Watermark text', [validators.Length(min=1, max=700)], default='Test Text')
+    text = StringField('Watermark text', [validators.Length(min=2, max=700)], default='Test Text')
     font_name = SelectField('Font name')
     font_size = IntegerField('Font size', [validators.NumberRange(min=5)], default=30)
     as_attachment = BooleanField('Open download dialog', default=False)
-    image = FileField('Image')
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    image = FileField(
+        'Image',
+        [image_file_is_required,
+         allowed_file_formats]
+    )
 
 
 def add_text(im, text, font_name, font_size):
@@ -36,6 +48,16 @@ def add_text(im, text, font_name, font_size):
     return im
 
 
+def convert_image(form):
+    im = Image.open(request.files[form.image.name])
+    im.thumbnail((800, 1200), Image.LANCZOS)
+    im = add_text(im, form.text.data, form.font_name.data, form.font_size.data)
+    image_io = BytesIO()
+    im.save(image_io, 'JPEG', quality=85)
+    image_io.seek(0)
+    return image_io
+
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     form = UploadForm(request.form)
@@ -44,21 +66,9 @@ def upload_file():
 
     if request.method == 'POST' and form.validate():
 
-        file = request.files[form.image.name]
-
-        filename = secure_filename(form.image.name)
-        base, _ = os.path.splitext(filename)
-        filename = base + '.jpg'
-
-        im = Image.open(file)
-        im.thumbnail((800, 1200), Image.LANCZOS)
-        im = add_text(im, form.text.data, form.font_name.data, form.font_size.data)
-        image_io = BytesIO()
-        im.save(image_io, 'JPEG', quality=85)
-        image_io.seek(0)
         return send_file(
-            image_io,
-            attachment_filename=filename,
+            convert_image(form),
+            attachment_filename=form.base_image_name + '.jpg',
             mimetype='image/jpeg',
             as_attachment=form.as_attachment.data,
         )

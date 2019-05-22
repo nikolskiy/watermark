@@ -22,6 +22,9 @@
           <div class="form-group col-md-6">
             {{ form.text.label }}
             {{ form.text(class_="form-control") }}
+            {% if form.text.errors %}
+                {{ form.text.errors[0] }}
+            {% endif %}
           </div>
         </div>
         <div class="form-row">
@@ -29,11 +32,17 @@
           <div class="form-group col-md-4">
             {{ form.font_name.label }}
             {{ form.font_name(class_="form-control") }}
+            {% if form.font_name.errors %}
+              {{ form.font_name.errors[0] }}
+            {% endif %}
           </div>
 
           <div class="form-group col-md-2">
             {{ form.font_size.label }}
             {{ form.font_size(class_="form-control") }}
+            {% if form.font_size.errors %}
+              {{ form.font_size.errors[0] }}
+            {% endif %}
           </div>
 
         </div>
@@ -48,6 +57,9 @@
         <div class="form-row">
           <div class="form-group col-mid-6">
             {{ form.image(class_="form-control-file") }}
+            {% if form.image.errors %}
+              {{ form.image.errors[0] }}
+            {% endif %}
           </div>
           <div class="form-group col-mid-6">
             <button type="submit" class="btn btn-primary">Process</button>
