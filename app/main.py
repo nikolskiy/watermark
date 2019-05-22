@@ -61,7 +61,14 @@ def convert_image(form):
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     form = UploadForm(request.form)
-    form.font_name.choices = [('AmaticaSC-Bold.ttf', 'AmaticaSC-Bold')]
+
+    form.font_name.choices = [
+        ('AmaticaSC-Bold.ttf', 'Amatica SC Bold'),
+        ('AmaticaSC-Regular.ttf', 'Amatica SC Regular'),
+        ('FreeSerifItalic.ttf', 'Free Serif Italic'),
+        ('Sansita-Italic.otf', 'Sansita Italic'),
+
+    ]
     form.font_name.default = 'AmaticaSC-Bold.ttf'
 
     if request.method == 'POST' and form.validate():
