@@ -20,40 +20,34 @@
       <form method=post enctype=multipart/form-data target="_blank">
         <div class="form-row">
           <div class="form-group col-md-6">
-            <label for="watermarkText">Watermark text</label>
-            <input type="email" class="form-control" id="watermarkText" placeholder="Test Text" name="text">
+            {{ form.text.label }}
+            {{ form.text(class_="form-control") }}
           </div>
         </div>
         <div class="form-row">
 
           <div class="form-group col-md-4">
-            <label for="inputFont">Font</label>
-            <select id="inputFont" class="form-control" name="font_name">
-              <option selected>Choose...</option>
-              <option>A</option>
-              <option>B</option>
-            </select>
+            {{ form.font_name.label }}
+            {{ form.font_name(class_="form-control") }}
           </div>
 
           <div class="form-group col-md-2">
-            <label for="inputFontSize">Font size</label>
-            <input type="number" class="form-control" placeholder="30" id="inputFontSize" name="font_size">
+            {{ form.font_size.label }}
+            {{ form.font_size(class_="form-control") }}
           </div>
 
         </div>
 
         <div class="form-group">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="asAttachment" name="as_attachment">
-            <label class="form-check-label" for="asAttachment">
-              As attachment
-            </label>
+            {{ form.as_attachment(class_="form-check-input") }}
+            {{ form.as_attachment.label(class_="form-check-label") }}
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group col-mid-6">
-            <input type="file" name="file" class="form-control-file" id="fileUpload">
+            {{ form.image(class_="form-control-file") }}
           </div>
           <div class="form-group col-mid-6">
             <button type="submit" class="btn btn-primary">Process</button>
