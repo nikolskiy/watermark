@@ -26,7 +26,7 @@ def allowed_file_formats(form, field):
 
 
 class UploadForm(Form):
-    text = StringField('Watermark text', [validators.Length(min=2, max=700)], default='Test Text')
+    text = StringField('Watermark text', [validators.Length(min=2, max=700)], default='Street Russian')
     font_name = SelectField('Font name')
     font_size = IntegerField('Font size', [validators.NumberRange(min=5)], default=30)
     as_attachment = BooleanField('Open download dialog', default=False)
