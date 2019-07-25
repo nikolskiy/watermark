@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, render_template, send_file
 from werkzeug.utils import secure_filename
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ExifTags
 from io import BytesIO
 
 from wtforms import Form, BooleanField, StringField, SelectField, IntegerField, FileField, validators
@@ -48,8 +48,48 @@ def add_text(im, text, font_name, font_size):
     return im
 
 
+def orientation_correction(image: Image) -> Image:
+    """
+    Depending on how camera was held some images might get messed up orientation
+    after thumbnail function resizes them. Full explanation and solution were
+    borrowed from
+    https://stackoverflow.com/questions/4228530/pil-thumbnail-is-rotating-my-image
+    :param image: Original image
+    :return: image
+    """
+    # only present in JPEGs
+    if not hasattr(image, '_getexif'):
+        return image
+
+    # returns None if no EXIF data
+    e = image._getexif()
+    if e is None:
+        return image
+
+    # pick correct orientation code from ExifTags
+    orientation = None
+    for key in ExifTags.TAGS.keys():
+        if ExifTags.TAGS[key] == 'Orientation':
+            orientation = key
+            break
+
+    # get orientation number
+    exif = dict(e.items())
+    orientation = exif.get(orientation, None)
+
+    if orientation == 3:
+        return image.transpose(Image.ROTATE_180)
+    if orientation == 6:
+        return image.transpose(Image.ROTATE_270)
+    if orientation == 8:
+        return image.transpose(Image.ROTATE_90)
+
+    return image
+
+
 def convert_image(form):
     im = Image.open(request.files[form.image.name])
+    im = orientation_correction(im)
     im.thumbnail((800, 1200), Image.LANCZOS)
     im = add_text(im, form.text.data, form.font_name.data, form.font_size.data)
     image_io = BytesIO()
